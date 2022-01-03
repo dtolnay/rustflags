@@ -9,3 +9,6 @@ description = "Parser for CARGO_ENCODED_RUSTFLAGS"
 repository = "https://github.com/dtolnay/rustflags"
 documentation = "https://docs.rs/rustflags"
 readme = "README.md"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
