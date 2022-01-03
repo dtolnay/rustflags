@@ -1,5 +1,7 @@
 mod parse;
 mod render;
+#[cfg(test)]
+mod tests;
 mod write;
 
 use std::env;
