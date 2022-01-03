@@ -23,7 +23,7 @@ aspects of the upcoming rustc invocation, it likely needs these flags.
 
 ```toml
 [build-dependencies]
-rustflags = "0.0"
+rustflags = "0.1"
 ```
 
 <br>
