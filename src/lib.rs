@@ -2,6 +2,7 @@ mod parse;
 
 use std::env;
 use std::ffi::OsString;
+use std::fmt::{self, Display, Write};
 use std::path::PathBuf;
 
 pub fn from_env() -> RustFlags {
@@ -220,6 +221,18 @@ impl Default for LibraryKind {
     }
 }
 
+impl Display for LibraryKind {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(match self {
+            LibraryKind::Dependency => "dependency",
+            LibraryKind::Crate => "crate",
+            LibraryKind::Native => "native",
+            LibraryKind::Framework => "framework",
+            LibraryKind::All => "all",
+        })
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum LinkKind {
@@ -237,12 +250,31 @@ impl Default for LinkKind {
     }
 }
 
+impl Display for LinkKind {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(match self {
+            LinkKind::Static => "static",
+            LinkKind::Framework => "framework",
+            LinkKind::Dylib => "dylib",
+        })
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum LinkModifierPrefix {
     /// `+`
     Enable,
     /// `-`
     Disable,
+}
+
+impl Display for LinkModifierPrefix {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_char(match self {
+            LinkModifierPrefix::Enable => '+',
+            LinkModifierPrefix::Disable => '-',
+        })
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -256,6 +288,17 @@ pub enum LinkModifier {
     WholeArchive,
     /// `as-needed`
     AsNeeded,
+}
+
+impl Display for LinkModifier {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(match self {
+            LinkModifier::Bundle => "bundle",
+            LinkModifier::Verbatim => "verbatim",
+            LinkModifier::WholeArchive => "whole-archive",
+            LinkModifier::AsNeeded => "as-needed",
+        })
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -275,6 +318,20 @@ pub enum CrateType {
     Staticlib,
     /// `proc-macro`
     ProcMacro,
+}
+
+impl Display for CrateType {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(match self {
+            CrateType::Bin => "bin",
+            CrateType::Lib => "lib",
+            CrateType::Rlib => "rlib",
+            CrateType::Dylib => "dylib",
+            CrateType::Cdylib => "Cdylib",
+            CrateType::Staticlib => "staticlib",
+            CrateType::ProcMacro => "proc-macro",
+        })
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -298,6 +355,21 @@ pub enum Emit {
     Mir,
 }
 
+impl Display for Emit {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(match self {
+            Emit::Asm => "asm",
+            Emit::LlvmBc => "llvm-bc",
+            Emit::LlvmIr => "llvm-ir",
+            Emit::Obj => "obj",
+            Emit::Metadata => "metadata",
+            Emit::Link => "link",
+            Emit::DepInfo => "dep-info",
+            Emit::Mir => "mir",
+        })
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum LintLevel {
     /// `allow`
@@ -310,6 +382,17 @@ pub enum LintLevel {
     Forbid,
 }
 
+impl Display for LintLevel {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(match self {
+            LintLevel::Allow => "allow",
+            LintLevel::Warn => "warn",
+            LintLevel::Deny => "deny",
+            LintLevel::Forbid => "forbid",
+        })
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum ErrorFormat {
@@ -319,6 +402,16 @@ pub enum ErrorFormat {
     Json,
     /// `short`
     Short,
+}
+
+impl Display for ErrorFormat {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(match self {
+            ErrorFormat::Human => "human",
+            ErrorFormat::Json => "json",
+            ErrorFormat::Short => "short",
+        })
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -334,5 +427,15 @@ pub enum Color {
 impl Default for Color {
     fn default() -> Self {
         Color::Auto
+    }
+}
+
+impl Display for Color {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(match self {
+            Color::Auto => "auto",
+            Color::Always => "always",
+            Color::Never => "never",
+        })
     }
 }
