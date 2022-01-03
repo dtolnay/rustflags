@@ -1,3 +1,12 @@
+#![allow(
+    clippy::cast_lossless,
+    clippy::items_after_statements,
+    clippy::must_use_candidate,
+    clippy::too_many_lines,
+    clippy::type_complexity,
+    clippy::unnecessary_wraps
+)]
+
 mod parse;
 mod render;
 #[cfg(test)]
