@@ -1,5 +1,36 @@
+mod parse;
+
+use std::env;
 use std::ffi::OsString;
 use std::path::PathBuf;
+
+pub fn from_env() -> RustFlags {
+    let encoded = env::var_os("CARGO_ENCODED_RUSTFLAGS")
+        .unwrap_or_default()
+        .into_string()
+        .unwrap_or_else(|s| s.to_string_lossy().into_owned());
+    RustFlags {
+        encoded,
+        pos: 0,
+        repeat: None,
+        short: false,
+    }
+}
+
+pub struct RustFlags {
+    encoded: String,
+    pos: usize,
+    repeat: Option<(fn(&str) -> Option<(Flag, usize)>, usize)>,
+    short: bool,
+}
+
+impl Iterator for RustFlags {
+    type Item = Flag;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        parse::parse(self)
+    }
+}
 
 #[derive(Debug, PartialEq)]
 #[non_exhaustive]
