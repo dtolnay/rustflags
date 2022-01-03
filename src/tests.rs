@@ -14,6 +14,24 @@ fn test(encoded: &str, expected: &[Flag]) {
         short: false,
     };
 
+    let mut flags = Vec::new();
+    for expected in expected {
+        let next = iterator.next();
+        assert_eq!(Some(expected), next.as_ref());
+        for flag in next.unwrap() {
+            flags.push(flag.to_string_lossy().into_owned());
+        }
+    }
+
+    assert_eq!(None, iterator.next());
+
+    let mut iterator = RustFlags {
+        encoded: flags.join("\x1F"),
+        pos: 0,
+        repeat: None,
+        short: false,
+    };
+
     for expected in expected {
         assert_eq!(Some(expected), iterator.next().as_ref());
     }
