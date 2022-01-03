@@ -214,6 +214,12 @@ pub enum LibraryKind {
     All,
 }
 
+impl Default for LibraryKind {
+    fn default() -> Self {
+        LibraryKind::All
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum LinkKind {
@@ -223,6 +229,12 @@ pub enum LinkKind {
     Framework,
     /// `dylib` (the default)
     Dylib,
+}
+
+impl Default for LinkKind {
+    fn default() -> Self {
+        LinkKind::Dylib
+    }
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -317,4 +329,10 @@ pub enum Color {
     Always,
     /// Never colorize output.
     Never,
+}
+
+impl Default for Color {
+    fn default() -> Self {
+        Color::Auto
+    }
 }
