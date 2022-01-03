@@ -18,6 +18,7 @@ use std::ffi::OsString;
 use std::fmt::{self, Display, Write};
 use std::path::PathBuf;
 
+/// Parse flags from CARGO_ENCODED_RUSTFLAGS environment variable.
 pub fn from_env() -> RustFlags {
     let encoded = env::var_os("CARGO_ENCODED_RUSTFLAGS")
         .unwrap_or_default()
@@ -31,6 +32,7 @@ pub fn from_env() -> RustFlags {
     }
 }
 
+/// **Iterator of rustc flags**
 pub struct RustFlags {
     encoded: String,
     pos: usize,
@@ -46,6 +48,7 @@ impl Iterator for RustFlags {
     }
 }
 
+/// **One flag recognized by rustc**
 #[derive(Debug, PartialEq)]
 #[non_exhaustive]
 pub enum Flag {
@@ -213,6 +216,7 @@ pub enum Flag {
     RemapPathPrefix { from: PathBuf, to: PathBuf },
 }
 
+/// Argument of `-L`
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum LibraryKind {
@@ -246,6 +250,7 @@ impl Display for LibraryKind {
     }
 }
 
+/// Argument of `-l`
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum LinkKind {
@@ -273,6 +278,7 @@ impl Display for LinkKind {
     }
 }
 
+/// Argument of `-l`
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum LinkModifierPrefix {
     /// `+`
@@ -290,6 +296,7 @@ impl Display for LinkModifierPrefix {
     }
 }
 
+/// Argument of `-l`
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum LinkModifier {
@@ -314,6 +321,7 @@ impl Display for LinkModifier {
     }
 }
 
+/// Argument of `--crate-type`
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum CrateType {
@@ -347,6 +355,7 @@ impl Display for CrateType {
     }
 }
 
+/// Argument of `--emit`
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum Emit {
@@ -383,6 +392,7 @@ impl Display for Emit {
     }
 }
 
+/// Argument of `--cap-lints`
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum LintLevel {
     /// `allow`
@@ -406,6 +416,7 @@ impl Display for LintLevel {
     }
 }
 
+/// Argument of `--error-format`
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum ErrorFormat {
@@ -427,6 +438,7 @@ impl Display for ErrorFormat {
     }
 }
 
+/// Argument of `--color`
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum Color {
     /// Colorize, if output goes to a tty (default).
