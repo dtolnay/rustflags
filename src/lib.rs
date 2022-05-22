@@ -133,6 +133,7 @@
 #![doc(html_root_url = "https://docs.rs/rustflags/0.1.0")]
 #![allow(
     clippy::cast_lossless,
+    clippy::derive_partial_eq_without_eq,
     clippy::doc_markdown,
     clippy::items_after_statements,
     clippy::must_use_candidate,
