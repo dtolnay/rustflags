@@ -7,7 +7,6 @@ description = "Parser for CARGO_ENCODED_RUSTFLAGS"
 documentation = "https://docs.rs/rustflags"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-readme = "README.md"
 repository = "https://github.com/dtolnay/rustflags"
 rust-version = "1.56"
 
