@@ -136,6 +136,7 @@
     clippy::derive_partial_eq_without_eq,
     clippy::doc_markdown,
     clippy::items_after_statements,
+    clippy::items_after_test_module, // https://github.com/rust-lang/rust-clippy/issues/10713
     clippy::must_use_candidate,
     clippy::too_many_lines,
     clippy::type_complexity,
