@@ -10,6 +10,9 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/rustflags"
 rust-version = "1.56"
 
+[dev-dependencies]
+cmake = "0.1"
+
 [lib]
 doc-scrape-examples = false
 

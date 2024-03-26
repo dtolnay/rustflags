@@ -28,106 +28,36 @@ rustflags = "0.1"
 
 <br>
 
-## Examples
+## Example
 
-This build script wants to know whether it is okay to enable
-`#![feature(proc_macro_span)]`. If the user is building with `-Zallow-features`
-with a feature list that does not include `proc_macro_span`, we need to not
-enable the feature or the build will fail.
-
-```rust
-// build.rs
-
-use rustflags::Flag;
-
-fn main() {
-    if is_nightly() && feature_allowed("proc_macro_span") {
-        println!("cargo:rustc-cfg=proc_macro_span");
-    }
-}
-
-// Look for `-Z allow-features=feature1,feature2`
-fn feature_allowed(feature: &str) -> bool {
-    for flag in rustflags::from_env() {
-        if let Flag::Z(option) = flag {
-            if option.starts_with("allow-features=") {
-                return option["allow-features=".len()..]
-                    .split(',')
-                    .any(|allowed| allowed == feature);
-            }
-        }
-    }
-
-    // No allow-features= flag, allowed by default.
-    true
-}
-```
-
-This build scripts wants to try compiling a source file to figure out whether an
-unstable API is supported in the expected form by the current toolchain.
+This build script uses the `cmake` crate to compile some C code, and must
+configure it with a particular C preprocessor #define if the Rust build is being
+performed with sanitizers.
 
 ```rust
 // build.rs
 
 use rustflags::Flag;
 use std::env;
-use std::fs;
-use std::path::Path;
-use std::process::{Command, ExitStatus, Stdio};
-
-// This code exercises the surface area that we expect of the unstable
-// feature. If the current toolchain is able to compile it, we go ahead and
-// enable the feature.
-const PROBE: &str = r#"
-    #![feature(backtrace)]
-    #![allow(dead_code)]
-
-    use std::backtrace::{Backtrace, BacktraceStatus};
-
-    fn probe() {
-        let backtrace = Backtrace::capture();
-        match backtrace.status() {
-            BacktraceStatus::Captured | BacktraceStatus::Disabled | _ => {}
-        }
-    }
-"#;
+use std::path::PathBuf;
 
 fn main() {
-    match compile_probe() {
-        Some(status) if status.success() => println!("cargo:rustc-cfg=backtrace"),
-        _ => {}
+    let manifest_dir = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
+    let lib_source_dir = manifest_dir.join("lib");
+    assert!(lib_source_dir.join("CMakeLists.txt").exists());
+
+    let mut builder = cmake::Config::new(lib_source_dir);
+
+    // Look for -Zsanitizer=address
+    for flag in rustflags::from_env() {
+        if matches!(flag, Flag::Z(z) if z == "sanitizer=address") {
+            builder.define("ENABLE_SANITIZERS", "ON");
+            builder.define("SANITIZERS", "address");
+            break;
+        }
     }
-}
 
-fn compile_probe() -> Option<ExitStatus> {
-    let rustc = env::var_os("RUSTC")?;
-    let out_dir = env::var_os("OUT_DIR")?;
-    let probefile = Path::new(&out_dir).join("probe.rs");
-    fs::write(&probefile, PROBE).ok()?;
-
-    // Make sure to pick up Cargo rustc configuration.
-    let mut cmd = if let Some(wrapper) = env::var_os("CARGO_RUSTC_WRAPPER") {
-        let mut cmd = Command::new(wrapper);
-        // The wrapper's first argument is supposed to be the path to rustc.
-        cmd.arg(rustc);
-        cmd
-    } else {
-        Command::new(rustc)
-    };
-
-    cmd.stderr(Stdio::null())
-        .arg("--edition=2021")
-        .arg("--crate-name=try_backtrace")
-        .arg("--crate-type=lib")
-        .arg("--emit=metadata")
-        .arg("--out-dir")
-        .arg(out_dir)
-        .arg(probefile)
-        .args(rustflags::from_env()
-            .filter(|flag| matches!(flag, Flag::Cfg{..} | Flag::Z(_)))
-            .flatten())
-        .status()
-        .ok()
+    builder.build();
 }
 ```
 
