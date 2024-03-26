@@ -1,6 +1,6 @@
 [package]
 name = "rustflags"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 categories = ["development-tools::build-utils"]
 description = "Parser for CARGO_ENCODED_RUSTFLAGS"
