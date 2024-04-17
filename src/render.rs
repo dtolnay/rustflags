@@ -42,23 +42,23 @@ impl IntoIterator for Flag {
                 rename,
             } => {
                 flags.push(OsString::from("-l"));
-                let mut flag = String::new();
+                let mut flag = OsString::new();
                 if kind != LinkKind::default() || !modifiers.is_empty() {
                     write!(flag, "{}", kind);
                 }
                 for (i, (prefix, modifier)) in modifiers.iter().enumerate() {
-                    flag.push(if i == 0 { ':' } else { ',' });
+                    flag.push(if i == 0 { ":" } else { "," });
                     write!(flag, "{}{}", prefix, modifier);
                 }
                 if !flag.is_empty() {
-                    flag.push('=');
+                    flag.push("=");
                 }
-                flag.push_str(&name);
+                flag.push(name);
                 if let Some(rename) = rename {
-                    flag.push(':');
-                    flag.push_str(&rename);
+                    flag.push(":");
+                    flag.push(rename);
                 }
-                flags.push(OsString::from(flag));
+                flags.push(flag);
             }
 
             Flag::CrateType(crate_type) => {
