@@ -309,3 +309,25 @@ fn test_individual() {
         },
     );
 }
+
+#[test]
+fn test_unrecognized() {
+    assert_flags!(
+        "-goto",
+        Flag::Codegen {
+            opt: "debuginfo".to_owned(),
+            value: Some("2".to_owned()),
+        },
+        Flag::Out(PathBuf::from("to")),
+    );
+
+    assert_flags!(
+        "-gxvto" "-h",
+        Flag::Codegen {
+            opt: "debuginfo".to_owned(),
+            value: Some("2".to_owned()),
+        },
+        Flag::Verbose,
+        Flag::Out(PathBuf::from("-h")),
+    );
+}
