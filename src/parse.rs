@@ -346,7 +346,16 @@ pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
                 FlagConstructor::Flag(flag) => return Some(flag),
                 FlagConstructor::Opt(f) => ConstructorFn::Opt(f),
                 FlagConstructor::Repeated(f) => ConstructorFn::Repeated(f),
-                FlagConstructor::Unrecognized => continue,
+                FlagConstructor::Unrecognized => {
+                    // Skip rest of word.
+                    if let Some(i) = f.encoded[f.pos..].find(SEPARATOR) {
+                        f.pos += i + 1;
+                    } else {
+                        f.pos = f.encoded.len();
+                    }
+                    f.short = false;
+                    continue;
+                }
             };
             f.short = false;
             if f.pos == f.encoded.len() {

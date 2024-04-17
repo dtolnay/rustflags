@@ -327,7 +327,6 @@ fn test_unrecognized() {
             opt: "debuginfo".to_owned(),
             value: Some("2".to_owned()),
         },
-        Flag::Verbose,
-        Flag::Out(PathBuf::from("-h")),
+        Flag::Help,
     );
 }
