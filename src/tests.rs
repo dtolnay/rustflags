@@ -7,12 +7,7 @@ use std::path::PathBuf;
 
 #[track_caller]
 fn test(encoded: &str, expected: &[Flag]) {
-    let mut iterator = RustFlags {
-        encoded: encoded.to_owned(),
-        pos: 0,
-        repeat: None,
-        short: false,
-    };
+    let mut iterator = crate::from_encoded(encoded);
 
     let mut flags = Vec::new();
     for expected in expected {
