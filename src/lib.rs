@@ -68,6 +68,7 @@
     clippy::needless_doctest_main,
     clippy::too_many_lines,
     clippy::type_complexity,
+    clippy::uninlined_format_args,
     clippy::unnecessary_wraps
 )]
 
