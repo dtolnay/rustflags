@@ -330,7 +330,20 @@ fn lookup_long(name: &str) -> FlagConstructor {
 pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
     const SEPARATOR: char = '\x1F';
 
+    let mut skip = false;
+
     while f.pos < f.encoded.len() {
+        if skip {
+            match f.encoded[f.pos..].find(SEPARATOR) {
+                // `nonflag` ...
+                Some(i) => f.pos += i + 1,
+                // `nonflag`$
+                None => f.pos = f.encoded.len(),
+            }
+            skip = false;
+            continue;
+        }
+
         let (constructor, arg) = if let Some((constructor, len)) = f.repeat.take() {
             let arg = &f.encoded[f.pos..f.pos + len];
             f.pos += len;
@@ -347,13 +360,8 @@ pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
                 FlagConstructor::Opt(f) => ConstructorFn::Opt(f),
                 FlagConstructor::Repeated(f) => ConstructorFn::Repeated(f),
                 FlagConstructor::Unrecognized => {
-                    // Skip rest of word.
-                    if let Some(i) = f.encoded[f.pos..].find(SEPARATOR) {
-                        f.pos += i + 1;
-                    } else {
-                        f.pos = f.encoded.len();
-                    }
                     f.short = false;
+                    skip = true;
                     continue;
                 }
             };
@@ -442,12 +450,7 @@ pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
                 }
             }
         } else {
-            match f.encoded[f.pos..].find(SEPARATOR) {
-                // `nonflag` ...
-                Some(i) => f.pos += i + 1,
-                // `nonflag`$
-                None => f.pos = f.encoded.len(),
-            }
+            skip = true;
             continue;
         };
 
