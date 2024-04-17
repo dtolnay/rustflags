@@ -2,12 +2,12 @@ use crate::{
     Color, CrateType, Emit, ErrorFormat, Flag, LibraryKind, LinkKind, LinkModifier,
     LinkModifierPrefix, LintLevel,
 };
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::path::PathBuf;
 
 #[track_caller]
 fn test(encoded: &str, expected: &[Flag]) {
-    let mut iterator = crate::from_encoded(encoded);
+    let mut iterator = crate::from_encoded(OsStr::new(encoded));
 
     let mut flags = Vec::new();
     for expected in expected {
@@ -20,7 +20,8 @@ fn test(encoded: &str, expected: &[Flag]) {
 
     assert_eq!(None, iterator.next());
 
-    let mut iterator = crate::from_encoded(&flags.join("\x1F"));
+    let re_encoded = flags.join("\x1F");
+    let mut iterator = crate::from_encoded(OsStr::new(&re_encoded));
 
     for expected in expected {
         assert_eq!(Some(expected), iterator.next().as_ref());

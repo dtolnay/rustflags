@@ -82,16 +82,13 @@ mod write;
 
 use crate::string::{EnvStr, EnvString};
 use std::env;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::fmt::{self, Display, Write};
 use std::path::PathBuf;
 
 /// Parse flags from CARGO_ENCODED_RUSTFLAGS environment variable.
 pub fn from_env() -> RustFlags {
-    let encoded = env::var_os("CARGO_ENCODED_RUSTFLAGS")
-        .unwrap_or_default()
-        .into_string()
-        .unwrap_or_else(|s| s.to_string_lossy().into_owned());
+    let encoded = env::var_os("CARGO_ENCODED_RUSTFLAGS").unwrap_or_default();
     RustFlags {
         encoded: EnvString::new(encoded),
         pos: 0,
@@ -106,7 +103,7 @@ pub fn from_env() -> RustFlags {
 ///
 /// - `CARGO_ENCODED_RUSTFLAGS` (Cargo 1.55+)
 /// - `CARGO_ENCODED_RUSTDOCFLAGS` (Cargo 1.55+)
-pub fn from_encoded(encoded: &str) -> RustFlags {
+pub fn from_encoded(encoded: &OsStr) -> RustFlags {
     RustFlags {
         encoded: EnvString::new(encoded.to_owned()),
         pos: 0,
