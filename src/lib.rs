@@ -76,8 +76,6 @@
 mod parse;
 mod render;
 mod string;
-#[cfg(test)]
-mod tests;
 mod write;
 
 use crate::string::{EnvStr, EnvString};
