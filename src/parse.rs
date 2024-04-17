@@ -377,15 +377,7 @@ pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
                 arg
             };
             (constructor, arg)
-        } else if !f.encoded[f.pos..].starts_with('-') {
-            match f.encoded[f.pos..].find(SEPARATOR) {
-                // `nonflag` ...
-                Some(i) => f.pos += i + 1,
-                // `nonflag`$
-                None => f.pos = f.encoded.len(),
-            }
-            continue;
-        } else {
+        } else if f.encoded[f.pos..].starts_with('-') {
             match f.encoded[f.pos + 1..].chars().next() {
                 // `-` ...
                 Some(SEPARATOR) => {
@@ -449,6 +441,14 @@ pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
                     continue;
                 }
             }
+        } else {
+            match f.encoded[f.pos..].find(SEPARATOR) {
+                // `nonflag` ...
+                Some(i) => f.pos += i + 1,
+                // `nonflag`$
+                None => f.pos = f.encoded.len(),
+            }
+            continue;
         };
 
         enum ConstructorFn {
