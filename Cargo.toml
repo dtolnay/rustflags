@@ -8,7 +8,7 @@ documentation = "https://docs.rs/rustflags"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/dtolnay/rustflags"
-rust-version = "1.56"
+rust-version = "1.58"
 
 [dev-dependencies]
 cmake = "0.1"
