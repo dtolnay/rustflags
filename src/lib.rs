@@ -96,6 +96,21 @@ pub fn from_env() -> RustFlags {
     }
 }
 
+/// Parse flags from a string separated with ASCII unit separator ('\x1f').
+///
+/// This is a valid format for the following environment variables:
+///
+/// - `CARGO_ENCODED_RUSTFLAGS` (Cargo 1.55+)
+/// - `CARGO_ENCODED_RUSTDOCFLAGS` (Cargo 1.55+)
+pub fn from_encoded(encoded: &str) -> RustFlags {
+    RustFlags {
+        encoded: encoded.to_owned(),
+        pos: 0,
+        repeat: None,
+        short: false,
+    }
+}
+
 /// **Iterator of rustc flags**
 pub struct RustFlags {
     encoded: String,
