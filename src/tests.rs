@@ -14,14 +14,14 @@ fn test(encoded: &str, expected: &[Flag]) {
         let next = iterator.next();
         assert_eq!(Some(expected), next.as_ref());
         for flag in next.unwrap() {
-            flags.push(flag.to_string_lossy().into_owned());
+            flags.push(flag);
         }
     }
 
     assert_eq!(None, iterator.next());
 
-    let re_encoded = flags.join("\x1F");
-    let mut iterator = crate::from_encoded(OsStr::new(&re_encoded));
+    let re_encoded = flags.join(OsStr::new("\x1F"));
+    let mut iterator = crate::from_encoded(&re_encoded);
 
     for expected in expected {
         assert_eq!(Some(expected), iterator.next().as_ref());
