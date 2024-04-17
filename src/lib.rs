@@ -74,10 +74,12 @@
 
 mod parse;
 mod render;
+mod string;
 #[cfg(test)]
 mod tests;
 mod write;
 
+use crate::string::{EnvStr, EnvString};
 use std::env;
 use std::ffi::OsString;
 use std::fmt::{self, Display, Write};
@@ -90,7 +92,7 @@ pub fn from_env() -> RustFlags {
         .into_string()
         .unwrap_or_else(|s| s.to_string_lossy().into_owned());
     RustFlags {
-        encoded,
+        encoded: EnvString::new(encoded),
         pos: 0,
         repeat: None,
         short: false,
@@ -105,7 +107,7 @@ pub fn from_env() -> RustFlags {
 /// - `CARGO_ENCODED_RUSTDOCFLAGS` (Cargo 1.55+)
 pub fn from_encoded(encoded: &str) -> RustFlags {
     RustFlags {
-        encoded: encoded.to_owned(),
+        encoded: EnvString::new(encoded.to_owned()),
         pos: 0,
         repeat: None,
         short: false,
@@ -114,9 +116,9 @@ pub fn from_encoded(encoded: &str) -> RustFlags {
 
 /// **Iterator of rustc flags**
 pub struct RustFlags {
-    encoded: String,
+    encoded: EnvString,
     pos: usize,
-    repeat: Option<(fn(&str) -> Option<(Flag, usize)>, usize)>,
+    repeat: Option<(fn(&EnvStr) -> Option<(Flag, usize)>, usize)>,
     short: bool,
 }
 

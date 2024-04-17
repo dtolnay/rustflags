@@ -1,13 +1,15 @@
+use crate::string::EnvStr;
 use crate::{Flag, RustFlags};
 
 enum FlagConstructor {
     Flag(Flag),
-    Opt(fn(&str) -> Option<Flag>),
-    Repeated(fn(&str) -> Option<(Flag, usize)>),
+    Opt(fn(&EnvStr) -> Option<Flag>),
+    Repeated(fn(&EnvStr) -> Option<(Flag, usize)>),
     Unrecognized,
 }
 
 mod opt {
+    use crate::string::EnvStr;
     use crate::{
         Color, CrateType, Emit, ErrorFormat, Flag, LibraryKind, LinkKind, LinkModifier,
         LinkModifierPrefix, LintLevel,
@@ -16,7 +18,8 @@ mod opt {
     use std::mem;
     use std::path::PathBuf;
 
-    pub(crate) fn cfg(arg: &str) -> Option<Flag> {
+    pub(crate) fn cfg(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         let (name, value) = match arg.split_once('=') {
             Some((name, value)) => {
                 let len = value.len();
@@ -33,21 +36,26 @@ mod opt {
         Some(Flag::Cfg { name, value })
     }
 
-    pub(crate) fn library_search_path(arg: &str) -> Option<Flag> {
-        let (kind, path) = match arg.split_once('=') {
-            Some(("dependency", path)) => (LibraryKind::Dependency, path),
-            Some(("crate", path)) => (LibraryKind::Crate, path),
-            Some(("native", path)) => (LibraryKind::Native, path),
-            Some(("framework", path)) => (LibraryKind::Framework, path),
-            Some(("all", path)) => (LibraryKind::All, path),
-            Some((_kind, _path)) => return None,
-            None => (LibraryKind::All, arg),
+    pub(crate) fn library_search_path(arg: &EnvStr) -> Option<Flag> {
+        let (kind, path) = if let Some((kind, path)) = arg.split_once('=') {
+            let kind = match kind.to_str()? {
+                "dependency" => LibraryKind::Dependency,
+                "crate" => LibraryKind::Crate,
+                "native" => LibraryKind::Native,
+                "framework" => LibraryKind::Framework,
+                "all" => LibraryKind::All,
+                _ => return None,
+            };
+            (kind, path)
+        } else {
+            (LibraryKind::All, arg)
         };
         let path = PathBuf::from(path);
         Some(Flag::LibrarySearchPath { kind, path })
     }
 
-    pub(crate) fn link(arg: &str) -> Option<Flag> {
+    pub(crate) fn link(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         let mut modifiers = Vec::new();
         let (kind, name) = match arg.split_once('=') {
             Some((mut kind, name)) => {
@@ -93,7 +101,7 @@ mod opt {
         })
     }
 
-    pub(crate) fn crate_type(mut arg: &str) -> Option<(Flag, usize)> {
+    pub(crate) fn crate_type(mut arg: &EnvStr) -> Option<(Flag, usize)> {
         while !arg.is_empty() {
             let first = match arg.split_once(',') {
                 Some((first, rest)) => {
@@ -101,6 +109,9 @@ mod opt {
                     first
                 }
                 None => mem::take(&mut arg),
+            };
+            let Some(first) = first.to_str() else {
+                continue;
             };
             let crate_type = match first {
                 "bin" => CrateType::Bin,
@@ -117,15 +128,17 @@ mod opt {
         None
     }
 
-    pub(crate) fn crate_name(arg: &str) -> Option<Flag> {
+    pub(crate) fn crate_name(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::CrateName(arg.to_owned()))
     }
 
-    pub(crate) fn edition(arg: &str) -> Option<Flag> {
+    pub(crate) fn edition(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         arg.parse().ok().map(Flag::Edition)
     }
 
-    pub(crate) fn emit(mut arg: &str) -> Option<(Flag, usize)> {
+    pub(crate) fn emit(mut arg: &EnvStr) -> Option<(Flag, usize)> {
         while !arg.is_empty() {
             let first = match arg.split_once(',') {
                 Some((first, rest)) => {
@@ -133,6 +146,9 @@ mod opt {
                     first
                 }
                 None => mem::take(&mut arg),
+            };
+            let Some(first) = first.to_str() else {
+                continue;
             };
             let emit = match first {
                 "asm" => Emit::Asm,
@@ -150,47 +166,56 @@ mod opt {
         None
     }
 
-    pub(crate) fn print(arg: &str) -> Option<Flag> {
+    pub(crate) fn print(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::Print(arg.to_owned()))
     }
 
-    pub(crate) fn out(arg: &str) -> Option<Flag> {
+    pub(crate) fn out(arg: &EnvStr) -> Option<Flag> {
         Some(Flag::Out(PathBuf::from(arg)))
     }
 
-    pub(crate) fn out_dir(arg: &str) -> Option<Flag> {
+    pub(crate) fn out_dir(arg: &EnvStr) -> Option<Flag> {
         Some(Flag::OutDir(PathBuf::from(arg)))
     }
 
-    pub(crate) fn explain(arg: &str) -> Option<Flag> {
+    pub(crate) fn explain(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::Explain(arg.to_owned()))
     }
 
-    pub(crate) fn target(arg: &str) -> Option<Flag> {
+    pub(crate) fn target(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::Target(arg.to_owned()))
     }
 
-    pub(crate) fn allow(arg: &str) -> Option<Flag> {
+    pub(crate) fn allow(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::Allow(arg.to_owned()))
     }
 
-    pub(crate) fn warn(arg: &str) -> Option<Flag> {
+    pub(crate) fn warn(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::Warn(arg.to_owned()))
     }
 
-    pub(crate) fn force_warn(arg: &str) -> Option<Flag> {
+    pub(crate) fn force_warn(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::ForceWarn(arg.to_owned()))
     }
 
-    pub(crate) fn deny(arg: &str) -> Option<Flag> {
+    pub(crate) fn deny(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::Deny(arg.to_owned()))
     }
 
-    pub(crate) fn forbid(arg: &str) -> Option<Flag> {
+    pub(crate) fn forbid(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::Forbid(arg.to_owned()))
     }
 
-    pub(crate) fn cap_lints(arg: &str) -> Option<Flag> {
+    pub(crate) fn cap_lints(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         let level = match arg {
             "allow" => LintLevel::Allow,
             "warn" => LintLevel::Warn,
@@ -201,7 +226,8 @@ mod opt {
         Some(Flag::CapLints(level))
     }
 
-    pub(crate) fn codegen(arg: &str) -> Option<Flag> {
+    pub(crate) fn codegen(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         let (opt, value) = match arg.split_once('=') {
             Some((opt, value)) => (opt, Some(value)),
             None => (arg, None),
@@ -211,32 +237,34 @@ mod opt {
         Some(Flag::Codegen { opt, value })
     }
 
-    pub(crate) fn extern_(arg: &str) -> Option<Flag> {
+    pub(crate) fn extern_(arg: &EnvStr) -> Option<Flag> {
         let (name, path) = match arg.split_once('=') {
             Some((name, path)) => (name, Some(path)),
             None => (arg, None),
         };
-        let name = name.to_owned();
+        let name = name.to_str()?.to_owned();
         let path = path.map(PathBuf::from);
         Some(Flag::Extern { name, path })
     }
 
-    pub(crate) fn extern_location(arg: &str) -> Option<Flag> {
+    pub(crate) fn extern_location(arg: &EnvStr) -> Option<Flag> {
         let (name, location) = arg.split_once('=')?;
-        let name = name.to_owned();
+        let name = name.to_str()?.to_owned();
         let location = OsString::from(location);
         Some(Flag::ExternLocation { name, location })
     }
 
-    pub(crate) fn sysroot(arg: &str) -> Option<Flag> {
+    pub(crate) fn sysroot(arg: &EnvStr) -> Option<Flag> {
         Some(Flag::Sysroot(PathBuf::from(arg)))
     }
 
-    pub(crate) fn z(arg: &str) -> Option<Flag> {
+    pub(crate) fn z(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::Z(arg.to_owned()))
     }
 
-    pub(crate) fn error_format(arg: &str) -> Option<Flag> {
+    pub(crate) fn error_format(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         let format = match arg {
             "human" => ErrorFormat::Human,
             "json" => ErrorFormat::Json,
@@ -246,11 +274,13 @@ mod opt {
         Some(Flag::ErrorFormat(format))
     }
 
-    pub(crate) fn json(arg: &str) -> Option<Flag> {
+    pub(crate) fn json(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         Some(Flag::Json(arg.to_owned()))
     }
 
-    pub(crate) fn color(arg: &str) -> Option<Flag> {
+    pub(crate) fn color(arg: &EnvStr) -> Option<Flag> {
+        let arg = arg.to_str()?;
         let color = match arg {
             "auto" => Color::Auto,
             "always" => Color::Always,
@@ -260,7 +290,7 @@ mod opt {
         Some(Flag::Color(color))
     }
 
-    pub(crate) fn remap_path_prefix(arg: &str) -> Option<Flag> {
+    pub(crate) fn remap_path_prefix(arg: &EnvStr) -> Option<Flag> {
         let (from, to) = arg.split_once('=')?;
         let from = PathBuf::from(from);
         let to = PathBuf::from(to);
@@ -414,6 +444,9 @@ pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
                         Some((name, arg)) => (name, Some(arg)),
                         None => (flag, None),
                     };
+                    let Some(name) = name.to_str() else {
+                        continue;
+                    };
                     let constructor = match lookup_long(name) {
                         // `--flag`
                         FlagConstructor::Flag(flag) if arg.is_none() => return Some(flag),
@@ -455,8 +488,8 @@ pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
         };
 
         enum ConstructorFn {
-            Opt(fn(&str) -> Option<Flag>),
-            Repeated(fn(&str) -> Option<(Flag, usize)>),
+            Opt(fn(&EnvStr) -> Option<Flag>),
+            Repeated(fn(&EnvStr) -> Option<(Flag, usize)>),
         }
 
         match constructor {
