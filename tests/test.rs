@@ -1,4 +1,6 @@
-use crate::{
+#![allow(clippy::too_many_lines)]
+
+use rustflags::{
     Color, CrateType, Emit, ErrorFormat, Flag, LibraryKind, LinkKind, LinkModifier,
     LinkModifierPrefix, LintLevel,
 };
@@ -7,7 +9,7 @@ use std::path::PathBuf;
 
 #[track_caller]
 fn test(encoded: &str, expected: &[Flag]) {
-    let mut iterator = crate::from_encoded(OsStr::new(encoded));
+    let mut iterator = rustflags::from_encoded(OsStr::new(encoded));
 
     let mut flags = Vec::new();
     for expected in expected {
@@ -21,7 +23,7 @@ fn test(encoded: &str, expected: &[Flag]) {
     assert_eq!(None, iterator.next());
 
     let re_encoded = flags.join(OsStr::new("\x1F"));
-    let mut iterator = crate::from_encoded(&re_encoded);
+    let mut iterator = rustflags::from_encoded(&re_encoded);
 
     for expected in expected {
         assert_eq!(Some(expected), iterator.next().as_ref());
