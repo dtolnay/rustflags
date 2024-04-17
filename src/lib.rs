@@ -64,6 +64,7 @@
     clippy::doc_markdown,
     clippy::items_after_statements,
     clippy::items_after_test_module, // https://github.com/rust-lang/rust-clippy/issues/10713
+    clippy::manual_find,
     clippy::must_use_candidate,
     clippy::needless_doctest_main,
     clippy::too_many_lines,
