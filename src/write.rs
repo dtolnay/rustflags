@@ -1,3 +1,4 @@
+use std::ffi::OsString;
 use std::fmt;
 
 pub(crate) trait WriteFmt {
@@ -5,6 +6,12 @@ pub(crate) trait WriteFmt {
 }
 
 impl WriteFmt for String {
+    fn write_fmt(&mut self, args: fmt::Arguments) {
+        fmt::Write::write_fmt(self, args).unwrap();
+    }
+}
+
+impl WriteFmt for OsString {
     fn write_fmt(&mut self, args: fmt::Arguments) {
         fmt::Write::write_fmt(self, args).unwrap();
     }

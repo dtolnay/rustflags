@@ -1,6 +1,6 @@
 use crate::write::WriteFmt;
 use crate::{Flag, LibraryKind, LinkKind};
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 
 impl IntoIterator for Flag {
     type Item = OsString;
@@ -28,8 +28,10 @@ impl IntoIterator for Flag {
                 if kind == LibraryKind::All {
                     flags.push(OsString::from(path));
                 } else {
-                    let path = path.to_string_lossy();
-                    flags.push(OsString::from(format!("{}={}", kind, path)));
+                    let mut flag = OsString::new();
+                    write!(flag, "{}=", kind);
+                    flag.push(path);
+                    flags.push(flag);
                 }
             }
 
@@ -158,11 +160,7 @@ impl IntoIterator for Flag {
             Flag::Extern { name, path } => {
                 flags.push(OsString::from("--extern"));
                 if let Some(path) = path {
-                    flags.push(OsString::from(format!(
-                        "{}={}",
-                        name,
-                        path.to_string_lossy(),
-                    )));
+                    flags.push(kv(name, path));
                 } else {
                     flags.push(OsString::from(name));
                 }
@@ -170,11 +168,7 @@ impl IntoIterator for Flag {
 
             Flag::ExternLocation { name, location } => {
                 flags.push(OsString::from("--extern-location"));
-                flags.push(OsString::from(format!(
-                    "{}={}",
-                    name,
-                    location.to_string_lossy(),
-                )));
+                flags.push(kv(name, location));
             }
 
             Flag::Sysroot(sysroot) => {
@@ -204,11 +198,7 @@ impl IntoIterator for Flag {
 
             Flag::RemapPathPrefix { from, to } => {
                 flags.push(OsString::from("--remap-path-prefix"));
-                flags.push(OsString::from(format!(
-                    "{}={}",
-                    from.to_string_lossy(),
-                    to.to_string_lossy(),
-                )));
+                flags.push(kv(from, to));
             }
         }
 
@@ -216,6 +206,16 @@ impl IntoIterator for Flag {
             items: flags.into_iter(),
         }
     }
+}
+
+fn kv(k: impl AsRef<OsStr>, v: impl AsRef<OsStr>) -> OsString {
+    let k = k.as_ref();
+    let v = v.as_ref();
+    let mut string = OsString::with_capacity(k.len() + 1 + v.len());
+    string.push(k);
+    string.push("=");
+    string.push(v);
+    string
 }
 
 mod iter {
