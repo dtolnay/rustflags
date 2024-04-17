@@ -1,5 +1,6 @@
-use crate::string::EnvStr;
+use crate::string::{EnvChar, EnvStr};
 use crate::{Flag, RustFlags};
+use std::str;
 
 enum FlagConstructor {
     Flag(Flag),
@@ -379,12 +380,17 @@ pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
             f.pos += len;
             (ConstructorFn::Repeated(constructor), arg)
         } else if f.short {
-            let ch = f.encoded[f.pos..].chars().next().unwrap();
-            f.pos += ch.len_utf8();
-            if ch == SEPARATOR {
-                f.short = false;
-                continue;
-            }
+            let ch = match f.encoded[f.pos..].first_char().unwrap() {
+                EnvChar::Valid(ch) => {
+                    f.pos += ch.len_utf8();
+                    if ch == SEPARATOR {
+                        f.short = false;
+                        continue;
+                    }
+                    ch
+                }
+                EnvChar::Invalid => '\0',
+            };
             let constructor = match lookup_short(ch) {
                 FlagConstructor::Flag(flag) => return Some(flag),
                 FlagConstructor::Opt(f) => ConstructorFn::Opt(f),
@@ -416,13 +422,18 @@ pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
             };
             (constructor, arg)
         } else if f.encoded[f.pos..].starts_with('-') {
-            match f.encoded[f.pos + 1..].chars().next() {
+            let Some(first_char) = f.encoded[f.pos + 1..].first_char() else {
+                // `-`$
+                f.pos += 1;
+                continue;
+            };
+            match first_char {
                 // `-` ...
-                Some(SEPARATOR) => {
+                EnvChar::Valid(SEPARATOR) => {
                     f.pos += 2;
                     continue;
                 }
-                Some('-') => {
+                EnvChar::Valid('-') => {
                     let flag = match f.encoded[f.pos + 2..].find(SEPARATOR) {
                         // `--`
                         Some(0) => {
@@ -471,14 +482,9 @@ pub(crate) fn parse(f: &mut RustFlags) -> Option<Flag> {
                     (constructor, arg)
                 }
                 // `-X`
-                Some(_) => {
+                EnvChar::Valid(_) | EnvChar::Invalid => {
                     f.pos += 1;
                     f.short = true;
-                    continue;
-                }
-                // `-`$
-                None => {
-                    f.pos += 1;
                     continue;
                 }
             }
