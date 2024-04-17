@@ -1,6 +1,6 @@
 use crate::{
     Color, CrateType, Emit, ErrorFormat, Flag, LibraryKind, LinkKind, LinkModifier,
-    LinkModifierPrefix, LintLevel, RustFlags,
+    LinkModifierPrefix, LintLevel,
 };
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -20,12 +20,7 @@ fn test(encoded: &str, expected: &[Flag]) {
 
     assert_eq!(None, iterator.next());
 
-    let mut iterator = RustFlags {
-        encoded: flags.join("\x1F"),
-        pos: 0,
-        repeat: None,
-        short: false,
-    };
+    let mut iterator = crate::from_encoded(&flags.join("\x1F"));
 
     for expected in expected {
         assert_eq!(Some(expected), iterator.next().as_ref());
