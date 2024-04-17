@@ -297,7 +297,7 @@ pub enum Flag {
 }
 
 /// Argument of `-L`
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum LibraryKind {
     /// `dependency`
@@ -309,13 +309,8 @@ pub enum LibraryKind {
     /// `framework`
     Framework,
     /// `all` (the default)
+    #[default]
     All,
-}
-
-impl Default for LibraryKind {
-    fn default() -> Self {
-        LibraryKind::All
-    }
 }
 
 impl Display for LibraryKind {
@@ -331,7 +326,7 @@ impl Display for LibraryKind {
 }
 
 /// Argument of `-l`
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum LinkKind {
     /// `static`
@@ -339,13 +334,8 @@ pub enum LinkKind {
     /// `framework`
     Framework,
     /// `dylib` (the default)
+    #[default]
     Dylib,
-}
-
-impl Default for LinkKind {
-    fn default() -> Self {
-        LinkKind::Dylib
-    }
 }
 
 impl Display for LinkKind {
@@ -519,20 +509,15 @@ impl Display for ErrorFormat {
 }
 
 /// Argument of `--color`
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub enum Color {
     /// Colorize, if output goes to a tty (default).
+    #[default]
     Auto,
     /// Always colorize output.
     Always,
     /// Never colorize output.
     Never,
-}
-
-impl Default for Color {
-    fn default() -> Self {
-        Color::Auto
-    }
 }
 
 impl Display for Color {
