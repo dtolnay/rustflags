@@ -57,7 +57,7 @@
 //! }
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/rustflags/0.1.6")]
+#![doc(html_root_url = "https://docs.rs/rustflags/0.1.7")]
 #![allow(
     clippy::cast_lossless,
     clippy::derive_partial_eq_without_eq,
